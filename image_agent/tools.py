@@ -49,62 +49,6 @@ def process_stream_response(contents: list):
                 logger.info("\n\n--- ✅ Image Created ---")
                 
     return image_found, model_response_text, received_image_part
-
-
-async def generate_image(
-    prompt: str, tool_context: ToolContext) -> dict[str, any]:
-    """Generate Images to support text/prompt.
-
-    Args:
-        prompt (str): the prompt to provide to an image generation model
-
-    Returns:
-        dict[str, str]: {"status": "STATUS", "message" : "RESPONSE"}
-    """
-    contents = [
-        types.Content(
-                role="user",
-                parts=[
-                    types.Part.from_text(text=prompt)
-            ]
-            )
-    ]
-
-    user_content = tool_context.user_content
-
-    # Iterate through parts of the user_content
-    for i, part in enumerate(user_content.parts):
-        if hasattr(part, 'inline_data') and getattr(part.inline_data, 'data', None):
-            mime_type = part.inline_data.mime_type
-            logger.info(f"tool: Found image part {i} with mime_type: {mime_type}")
-            contents[0].parts.append(part)
-
-  
-    print(f"contents : {contents[0]}") 
-
-    image_found, model_response_text, received_image_part = process_stream_response(contents)
-
-    if not image_found:
-        logger.error("Generate image [1st try ]===========> no image data.")
-        image_found, model_response_text, received_image_part = process_stream_response(contents)
-
-    if not image_found:
-        logger.error("Generate image [2nd try ]===========> no image data.")
-        return {
-            "status": "fail",
-            "message": model_response_text,
-        }
-
-    filename = "last_image.png"
-
-    await tool_context.save_artifact(filename, received_image_part)
-    logger.info(f"Generated image saved as ADK artifact: {filename}")
-
-    return {
-        "status": "success",
-        "message": model_response_text,
-        "artifact_name": filename,
-    }
     
 async def generate_edit_image(
     prompt: str,  tool_context: ToolContext) -> dict[str, any]:
