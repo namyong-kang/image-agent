@@ -20,10 +20,10 @@ GENERATE_CONTENT_CONFIG = types.GenerateContentConfig(
     )
 
 load_dotenv()
-PROJECT_ID = os.getenv("PROJECT_ID")
+PROJECT_ID = os.getenv("GOOGLE_CLOUD_PROJECT")
 
 if not PROJECT_ID:
-    logger.error("PROJECT_ID is not set")
+    logger.error("GOOGLE_CLOUD_PROJECT is not set")
 
 CLIENT = genai.Client(vertexai=True, project=PROJECT_ID, location="global")
 
