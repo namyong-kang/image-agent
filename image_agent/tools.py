@@ -8,6 +8,8 @@ from google.adk.tools import ToolContext
 
 from pathlib import Path
 import logging
+import io
+from PIL import Image, ImageOps
 
 logger = logging.getLogger(__name__)
 
@@ -73,7 +75,7 @@ async def generate_edit_image(
         "Composite PRODUCT into SCENE with natural scale, perspective, and soft shadow."
     )
     if color_hint:
-        base_text += f" Keep product color coherence to '{color_hint}'."
+        base_text += f" Keep product color coherence to '{color_hint}'. Please use bespoke color form Samsung"
     contents = [types.Content(role="user", parts=[types.Part.from_text(text=base_text)])]
 
     # 2) SCENE 붙이기 (사용자 업로드에서)
@@ -81,7 +83,13 @@ async def generate_edit_image(
     added_scene = False
     for part in getattr(user_content, "parts", []):
         if getattr(part, "inline_data", None) and getattr(part.inline_data, "data", None):
-            contents[0].parts.append(part)
+            raw = part.inline_data.data
+            im = Image.open(io.BytesIO(raw))
+            im = ImageOps.exif_transpose(im)  # ✅ 회전 보정
+            buf = io.BytesIO()
+            im.save(buf, format="PNG")
+            buf.seek(0)
+            contents[0].parts.append(types.Part.from_bytes(data=buf.getvalue(), mime_type="image/png"))
             added_scene = True
             break
 
