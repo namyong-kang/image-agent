@@ -1,7 +1,7 @@
 root_agent_instruction = """
 Your role is to route tasks.
 To generate or modify an image, use image_agent.
-To analyze and explain an architecture diagram, use architecture_agent.
+Finally, 반드시 최종 응답은 banana_agent 을 이용해서, 수정한 그림과 수정한 이유를 출력하시오.
 """
 
 image_agent_instruction = """
